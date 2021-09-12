@@ -1,0 +1,30 @@
+.row{
+	margin:10px;
+	display:flex;
+}
+.row .lable{
+	width: 66px;
+    display: block;
+    text-align: left;
+	line-height: 26px;
+}
+
+.row .cont{
+	width:80%;
+	height:20px;
+}
+
+.actionGroup{
+	display: inline-flex;
+    width: 100%;
+	margin-bottom:5px;
+    justify-content: space-around;
+}
+.actionGroup .btn{
+	width:120px;
+}
+.state{
+	margin: 0 0 3px 9px;
+	position: absolute;
+    bottom: 0px;
+}
