@@ -35,11 +35,11 @@
     "<input id='preview' class='btn' disabled type='button' value='预览'/>" +
     "<input id='print' class='btn' disabled type='button' value='打印'/>" +
     "</div>" +
-    "<div style='border-bottom: 1px solid #F0F0F0;'><p id='state' class='state'>通讯连接中...</p></div>"
-"</div>"
+    "<div style='border-bottom: 1px solid #F0F0F0;'><p id='state' class='state'>通讯连接中...</p></div>" +
+    "</div>"
 
 Ufida.T.MP.Client.ManufactureOrder.fn.extend({
-    BarcodePrint: function (e) {
+    BarcodePrint: function(e) {
         var formData = {
             FType: 0,
             FEntryID: -1,
@@ -48,7 +48,7 @@ Ufida.T.MP.Client.ManufactureOrder.fn.extend({
             FPrintQty: 0,
             FCopies: 0,
         };
-        var rows = window.materialDetailController.productGrid.GetDataTable().Rows.map(function (r) {
+        var rows = window.materialDetailController.productGrid.GetDataTable().Rows.map(function(r) {
             return $.extend({}, r.Inventory, { Quantity: r.Quantity }, { ID: r.ID }, { _Code: r.Code, _No: Number(r.Code) + 1 });
         });
         var socket = undefined;
@@ -59,7 +59,7 @@ Ufida.T.MP.Client.ManufactureOrder.fn.extend({
                 title: '条码打印',
                 area: ['600px', '470px'],
                 content: '<div id="cc">' + html + '</div>',
-                success: function () {
+                success: function() {
                     initProductSelect(rows);
 
                     var first = rows[0]
@@ -69,7 +69,7 @@ Ufida.T.MP.Client.ManufactureOrder.fn.extend({
                     fullForm(first);
                     getTemplates(first, initTemplateSelect);
 
-                    $('#design').on('click', function () {
+                    $('#design').on('click', function() {
                         if (socket && socket.readyState == "1") {
                             socket.send(JSON.stringify($.extend({}, formData, { FType: 1 })))
                         } else {
@@ -77,7 +77,7 @@ Ufida.T.MP.Client.ManufactureOrder.fn.extend({
                         }
                     });
 
-                    $('#preview').on('click', function () {
+                    $('#preview').on('click', function() {
                         if (socket && socket.readyState == "1") {
                             formData.FPrintQty = $("#printNum").val();
                             formData.FCopies = $("#copyNum").val();
@@ -87,9 +87,9 @@ Ufida.T.MP.Client.ManufactureOrder.fn.extend({
                         }
                     });
 
-                    $('#print').on('click', function () {
+                    $('#print').on('click', function() {
                         if (socket && socket.readyState == "1") {
-                            layer.confirm('确定要打印吗?', function (index) {
+                            layer.confirm('确定要打印吗?', function(index) {
 
                                 formData.FPrintQty = $("#printNum").val();
                                 formData.FCopies = $("#copyNum").val();
@@ -105,25 +105,25 @@ Ufida.T.MP.Client.ManufactureOrder.fn.extend({
                     try {
                         if (WebSocket) {
                             socket = new WebSocket('ws://localhost:8181/');
-                            socket.addEventListener('open', function () {
+                            socket.addEventListener('open', function() {
                                 console.log('server is open');
                                 $('#state').css('color', 'green')
                                 $('#state').html("通讯服务已连接")
-                                timer = setInterval(function () { socket.send(JSON.stringify($.extend({}, { FType: 0, FTime: new Date() * 1 }))) }, 3000)
+                                timer = setInterval(function() { socket.send(JSON.stringify($.extend({}, { FType: 0, FTime: new Date() * 1 }))) }, 3000)
                             });
-                            socket.addEventListener('message', function (e) {
+                            socket.addEventListener('message', function(e) {
                                 var data = e.data;
                                 if (data) {
                                     console.log(data)
                                 }
                             });
-                            socket.addEventListener('close', function (e) {
+                            socket.addEventListener('close', function(e) {
                                 $('#state').css('color', 'red')
                                 $('#state').html("通讯服务已关闭")
                                 console.log('close' + e);
                                 if (timer) { clearInterval(timer); }
                             });
-                            socket.addEventListener('error', function (e) {
+                            socket.addEventListener('error', function(e) {
                                 $('#state').css('color', 'red')
                                 $('#state').html("连接通讯服务发生错误")
                                 console.log('error' + e);
@@ -134,25 +134,25 @@ Ufida.T.MP.Client.ManufactureOrder.fn.extend({
                         layer.alert('通讯服务发生异常!', { icon: 5 });
                     }
                 },
-                cancel: function (index) {
+                cancel: function(index) {
                     if (timer) { clearInterval(timer); }
-                    socket.close(); layer.close(index)
+                    socket.close();
+                    layer.close(index)
                 },
             });
-        }
-        else {
+        } else {
             layer.alert('当前单据尚未保存', { icon: 5 });
         }
 
         /*define*/
         function initProductSelect(data) {
-            data.forEach(function (row) {
+            data.forEach(function(row) {
                 $('#product').append("<option value='" + row.ID + "'>" + row._No + "||" + row._Code + "||" + row.Name + "</option>")
             })
-            $('#product').on('change', function (e) {
+            $('#product').on('change', function(e) {
                 var Id = $(this).val();
                 if (Id != undefined && Id != '-1') {
-                    var cur = rows.filter(function (f) { return f.ID == Id });
+                    var cur = rows.filter(function(f) { return f.ID == Id });
                     if (cur && cur.length > 0) {
                         cur = cur[0]
                         fullForm(cur);
@@ -169,7 +169,7 @@ Ufida.T.MP.Client.ManufactureOrder.fn.extend({
         }
 
         function initTemplateSelect(data) {
-            data.forEach(function (row) {
+            data.forEach(function(row) {
                 $('#template').append("<option data-fname ='" + row.FClientName + "'  data-fkey='" + row.FClientID + "' value='" + row.FID + "'>" + row.FTitle + "</option>")
             })
 
@@ -184,7 +184,7 @@ Ufida.T.MP.Client.ManufactureOrder.fn.extend({
             formData.FClientID = first.FClientID;
             formData.FRptID = first.FID;
 
-            $('#template').on('change', function (e) {
+            $('#template').on('change', function(e) {
                 var Id = $(this).val();
                 if (Id != undefined && Id != '-1') {
                     var target = $("#template").find("option:selected");
@@ -246,7 +246,7 @@ Ufida.T.MP.Client.ManufactureOrder.fn.extend({
                 data: formdata,
                 contentType: false,
                 processData: false,
-                success: function (res) {
+                success: function(res) {
                     $('#template').empty();
                     $('#template').append("<option value='-1'>--请选择--</option>")
                     try {
@@ -260,7 +260,7 @@ Ufida.T.MP.Client.ManufactureOrder.fn.extend({
                         layer.alert('查询客户模板发生错误!', { icon: 5 });
                     }
                 },
-                error: function (error) {
+                error: function(error) {
                     $('#template').empty();
                     layer.alert('当前单据尚未保存', { icon: 5 });
                 }
@@ -268,4 +268,3 @@ Ufida.T.MP.Client.ManufactureOrder.fn.extend({
         }
     }
 });
-

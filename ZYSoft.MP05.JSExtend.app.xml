@@ -1,15 +1,15 @@
-﻿<?xml version="1.0" encoding="utf-8" ?>
-<App id="ZYSoft.MP05.JSExtend" version="1.0" lisense="" name="JSExtend" description=""  appType="System">
+﻿<?xml version="1.0" encoding="utf-8"?>
+<App id="ZYSoft.MP05.JSExtend" version="1.0" lisense="" name="JSExtend" description="" appType="System">
   <Extension Point_id="Ufida.T.BAP.Web.StyleFile">
-	<Condition Page="Voucher" BizCode="mp05">
+    <Condition Page="Voucher" BizCode="mp05">
       <Do src="theme/default/layer.css"></Do>
     </Condition>
-	<Condition Page="Voucher" BizCode="mp05">
+    <Condition Page="Voucher" BizCode="mp05">
       <Do src="extend.css"></Do>
     </Condition>
   </Extension>
   <Extension Point_id="Ufida.T.BAP.Web.ScriptFile">
-	<Condition Page="Voucher" BizCode="mp05">
+    <Condition Page="Voucher" BizCode="mp05">
       <Do src="layer.js"></Do>
     </Condition>
     <Condition Page="Voucher" BizCode="mp05">
