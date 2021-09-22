@@ -40,6 +40,11 @@
 
 Ufida.T.MP.Client.ManufactureOrder.fn.extend({
     BarcodePrint: function(e) {
+		if($('#Auditor').val() == ""){
+			return layer.alert('当前单据尚未审批,禁止打印', { icon: 5 }, function(index){
+				layer.close(index);
+			});
+		}
         var formData = {
             FType: 0,
             FEntryID: -1,
