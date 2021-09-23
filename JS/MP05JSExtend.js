@@ -40,115 +40,115 @@
 
 Ufida.T.MP.Client.ManufactureOrder.fn.extend({
     BarcodePrint: function(e) {
-		if($('#Auditor').val() == ""){
-			return layer.alert('当前单据尚未审批,禁止打印', { icon: 5 }, function(index){
-				layer.close(index);
-			});
+	if($('#Auditor').val() == ""){
+		layer.alert('当前单据尚未审批,禁止打印', { icon: 5 }, function(index){
+			layer.close(index);
+		});
+	}else{
+		var formData = {
+		    FType: 0,
+		    FEntryID: -1,
+		    FClientID: -1,
+		    FRptID: -1,
+		    FPrintQty: 0,
+		    FCopies: 0,
+		};
+		var rows = window.materialDetailController.productGrid.GetDataTable().Rows.map(function(r) {
+		    return $.extend({}, r.Inventory, { Quantity: r.Quantity }, { ID: r.ID }, { _Code: r.Code, _No: Number(r.Code) + 1 });
+		});
+		var socket = undefined;
+		var timer = undefined;
+		if (rows && rows.length > 0) {
+		    layer.open({
+			type: 1,
+			title: '条码打印',
+			area: ['600px', '470px'],
+			content: '<div id="cc">' + html + '</div>',
+			success: function() {
+			    initProductSelect(rows);
+
+			    var first = rows[0]
+			    $("#product").val(first.ID)
+			    formData.FEntryID = first.ID;
+
+			    fullForm(first);
+			    getTemplates(first, initTemplateSelect);
+
+			    $('#design').on('click', function() {
+				if (socket && socket.readyState == "1") {
+				    socket.send(JSON.stringify($.extend({}, formData, { FType: 1 })))
+				} else {
+				    layer.alert('通讯服务尚未连接,禁止设计模板', { icon: 5 });
+				}
+			    });
+
+			    $('#preview').on('click', function() {
+				if (socket && socket.readyState == "1") {
+				    formData.FPrintQty = $("#printNum").val();
+				    formData.FCopies = $("#copyNum").val();
+				    socket.send(JSON.stringify($.extend({}, formData, { FType: 2 })))
+				} else {
+				    layer.alert('通讯服务尚未连接,禁止预览', { icon: 5 });
+				}
+			    });
+
+			    $('#print').on('click', function() {
+				if (socket && socket.readyState == "1") {
+				    layer.confirm('确定要打印吗?', function(index) {
+
+					formData.FPrintQty = $("#printNum").val();
+					formData.FCopies = $("#copyNum").val();
+
+					socket.send(JSON.stringify($.extend({}, formData, { FType: 3 })))
+					layer.close(index);
+				    });
+				} else {
+				    layer.alert('通讯服务尚未连接,禁止打印', { icon: 5 });
+				}
+			    });
+
+			    try {
+				if (WebSocket) {
+				    socket = new WebSocket('ws://localhost:8181/');
+				    socket.addEventListener('open', function() {
+					console.log('server is open');
+					$('#state').css('color', 'green')
+					$('#state').html("通讯服务已连接")
+					timer = setInterval(function() { socket.send(JSON.stringify($.extend({}, { FType: 0, FTime: new Date() * 1 }))) }, 3000)
+				    });
+				    socket.addEventListener('message', function(e) {
+					var data = e.data;
+					if (data) {
+					    console.log(data)
+					}
+				    });
+				    socket.addEventListener('close', function(e) {
+					$('#state').css('color', 'red')
+					$('#state').html("通讯服务已关闭")
+					console.log('close' + e);
+					if (timer) { clearInterval(timer); }
+				    });
+				    socket.addEventListener('error', function(e) {
+					$('#state').css('color', 'red')
+					$('#state').html("连接通讯服务发生错误")
+					console.log('error' + e);
+					if (timer) { clearInterval(timer); }
+				    });
+				}
+			    } catch (e) {
+				layer.alert('通讯服务发生异常!', { icon: 5 });
+			    }
+			},
+			cancel: function(index) {
+			    if (timer) { clearInterval(timer); }
+			    socket.close();
+			    layer.close(index)
+			},
+		    });
+		} else {
+		    layer.alert('当前单据尚未保存', { icon: 5 });
 		}
-        var formData = {
-            FType: 0,
-            FEntryID: -1,
-            FClientID: -1,
-            FRptID: -1,
-            FPrintQty: 0,
-            FCopies: 0,
-        };
-        var rows = window.materialDetailController.productGrid.GetDataTable().Rows.map(function(r) {
-            return $.extend({}, r.Inventory, { Quantity: r.Quantity }, { ID: r.ID }, { _Code: r.Code, _No: Number(r.Code) + 1 });
-        });
-        var socket = undefined;
-        var timer = undefined;
-        if (rows && rows.length > 0) {
-            layer.open({
-                type: 1,
-                title: '条码打印',
-                area: ['600px', '470px'],
-                content: '<div id="cc">' + html + '</div>',
-                success: function() {
-                    initProductSelect(rows);
-
-                    var first = rows[0]
-                    $("#product").val(first.ID)
-                    formData.FEntryID = first.ID;
-
-                    fullForm(first);
-                    getTemplates(first, initTemplateSelect);
-
-                    $('#design').on('click', function() {
-                        if (socket && socket.readyState == "1") {
-                            socket.send(JSON.stringify($.extend({}, formData, { FType: 1 })))
-                        } else {
-                            layer.alert('通讯服务尚未连接,禁止设计模板', { icon: 5 });
-                        }
-                    });
-
-                    $('#preview').on('click', function() {
-                        if (socket && socket.readyState == "1") {
-                            formData.FPrintQty = $("#printNum").val();
-                            formData.FCopies = $("#copyNum").val();
-                            socket.send(JSON.stringify($.extend({}, formData, { FType: 2 })))
-                        } else {
-                            layer.alert('通讯服务尚未连接,禁止预览', { icon: 5 });
-                        }
-                    });
-
-                    $('#print').on('click', function() {
-                        if (socket && socket.readyState == "1") {
-                            layer.confirm('确定要打印吗?', function(index) {
-
-                                formData.FPrintQty = $("#printNum").val();
-                                formData.FCopies = $("#copyNum").val();
-
-                                socket.send(JSON.stringify($.extend({}, formData, { FType: 3 })))
-                                layer.close(index);
-                            });
-                        } else {
-                            layer.alert('通讯服务尚未连接,禁止打印', { icon: 5 });
-                        }
-                    });
-
-                    try {
-                        if (WebSocket) {
-                            socket = new WebSocket('ws://localhost:8181/');
-                            socket.addEventListener('open', function() {
-                                console.log('server is open');
-                                $('#state').css('color', 'green')
-                                $('#state').html("通讯服务已连接")
-                                timer = setInterval(function() { socket.send(JSON.stringify($.extend({}, { FType: 0, FTime: new Date() * 1 }))) }, 3000)
-                            });
-                            socket.addEventListener('message', function(e) {
-                                var data = e.data;
-                                if (data) {
-                                    console.log(data)
-                                }
-                            });
-                            socket.addEventListener('close', function(e) {
-                                $('#state').css('color', 'red')
-                                $('#state').html("通讯服务已关闭")
-                                console.log('close' + e);
-                                if (timer) { clearInterval(timer); }
-                            });
-                            socket.addEventListener('error', function(e) {
-                                $('#state').css('color', 'red')
-                                $('#state').html("连接通讯服务发生错误")
-                                console.log('error' + e);
-                                if (timer) { clearInterval(timer); }
-                            });
-                        }
-                    } catch (e) {
-                        layer.alert('通讯服务发生异常!', { icon: 5 });
-                    }
-                },
-                cancel: function(index) {
-                    if (timer) { clearInterval(timer); }
-                    socket.close();
-                    layer.close(index)
-                },
-            });
-        } else {
-            layer.alert('当前单据尚未保存', { icon: 5 });
-        }
-
+	}
         /*define*/
         function initProductSelect(data) {
             data.forEach(function(row) {
